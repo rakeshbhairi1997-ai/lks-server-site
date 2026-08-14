@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LKS Foods - Amazon Style</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root { 
+  --primary: #FF9900; 
+  --primary-hover: #fa8900;
+  --bg: #eaeded; 
+  --card: #ffffff; 
+  --text: #0f1111; 
+  --muted: #565959; 
+  --border: #d5d9d9; 
+  --accent: #007185;
+  --nav-bg: #131921;
+  --nav-sub: #232f3e;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+body { font-family: 'Arial', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
+
+.content-wrapper { flex: 1; padding-bottom: 90px; }
+
+header { background: var(--nav-bg); color: white; padding: 10px 20px; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3a4553; }
+.brand { display: flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.brand i { color: var(--primary); font-size: 24px; }
+.user-info { display: flex; align-items: center; gap: 10px; }
+.btn-auth { background: var(--primary); color: #0f1111; border: none; padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; transition: background 0.2s; }
+.btn-auth:hover { background: var(--primary-hover); }
+.btn-auth.secondary { background: transparent; color: white; border: 1px solid var(--border); }
+.btn-auth.secondary:hover { background: rgba(255,255,255,0.1); }
+
+.hero { background: var(--nav-sub); color: white; padding: 25px 20px; text-align: center; border-bottom: 1px solid var(--border); }
+.hero h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+.hero p { color: #cccccc; font-size: 13px; }
+
+.hero-timing-badge { margin-top: 10px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.1); display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; color: #ffbf00; }
+
+.container { max-width: 1400px; margin: 15px auto; padding: 0 15px; }
+
+.sticky-category-container {
+  position: sticky;
+  top: 57px;
+  background: var(--bg);
+  z-index: 900;
+  padding-top: 10px;
+  padding-bottom: 5px;
+}
+
+.section-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; color: var(--text); }
+
+.category-bar { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 10px 0; scrollbar-width: none; }
+.category-bar::-webkit-scrollbar { display: none; }
+.cat-btn { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 7px 16px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.cat-btn.active, .cat-btn:hover { background: var(--nav-sub); color: white; border-color: var(--nav-sub); }
+
+.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 15px; margin-bottom: 30px; }
+@media (max-width: 1200px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
+.card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); border-color: #999; }
+.card-img { width: 100%; height: 150px; object-fit: cover; background: #f7f7f7; padding: 8px; }
+.card-body { padding: 12px 14px; display: flex; flex-direction: column; flex-grow: 1; }
+.card-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #cc0c39; background: #fff0f1; padding: 2px 6px; border-radius: 3px; width: fit-content; margin-bottom: 6px; }
+.card-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--text); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-portion { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #eee; }
+.card-price { font-size: 15px; font-weight: 700; color: #B12704; }
+.btn-add { background: var(--primary); color: #0f1111; border: none; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(255,153,0,0.3); transition: background 0.2s; }
+.btn-add:hover { background: var(--primary-hover); }
+
+.pagination-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 30px 0; }
+.page-btn { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; transition: background 0.2s; }
+.page-btn.active, .page-btn:hover { background: var(--nav-sub); color: white; border-color: var(--nav-sub); }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.cart-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: min(92%, 480px); background: var(--nav-bg); color: white; padding: 12px 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 1100; border: 1px solid #3a4553; }
+.cart-btn { background: var(--primary); color: #0f1111; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+.cart-btn:hover { background: var(--primary-hover); }
+
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 2000; place-items: center; padding: 15px; }
+.modal-box { background: var(--card); border: 1px solid var(--border); width: min(420px, 100%); border-radius: 10px; padding: 22px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+.modal-header h3 { font-size: 17px; font-weight: 700; color: var(--text); }
+.close-btn { background: none; border: 0; font-size: 20px; cursor: pointer; color: var(--muted); }
+.close-btn:hover { color: var(--text); }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 5px; color: var(--text); }
+.form-group input, .form-group textarea { width: 100%; padding: 9px 12px; background: #f0f2f2; border: 1px solid var(--border); border-radius: 6px; font: inherit; font-size: 13px; color: var(--text); transition: all 0.2s; }
+.form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,133,0.15); background: #fff; }
+.cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.qty-controls { display: flex; align-items: center; gap: 8px; }
+.qty-btn { width: 26px; height: 26px; border-radius: 4px; border: 1px solid var(--border); background: #f0f2f2; color: var(--text); cursor: pointer; font-weight: bold; display: grid; place-items: center; transition: background 0.2s; }
+.qty-btn:hover { background: #e3e6e6; }
+
+.history-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #f8f9fa; }
+.history-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.history-status { font-weight: 700; color: #b12704; }
+.history-status.Completed { color: #067d62; }
+.history-status.Accepted { color: #1d4ed8; }
+.history-status.Preparing { color: #a16207; }
+.history-status.Out_for_Delivery { color: #6d28d9; }
+.history-status.Cancelled { color: #b91c1c; }
+
+.btn-cancel { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+.btn-cancel:hover { background: #b02a37; }
+
+.notice-box { background: #fff5f5; border: 1px solid #fcc; color: #c00; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-bottom: 12px; display: none; overflow: hidden; }
+
+.cart-btn:disabled { background: #222 !important; color: #fff !important; border-color: #222 !important; cursor: not-allowed !important; opacity: 0.8; }
+
+.btn-location { background: #007185; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s; }
+.btn-location:hover { background: #005f70; }
+
+footer { background: var(--nav-bg); color: #cccccc; text-align: center; padding: 30px 20px; font-size: 12px; width: 100%; border-top: 1px solid #3a4553; margin-top: auto; }
+footer b { color: white; font-size: 14px; }
+footer p { margin-bottom: 5px; }
+</style>
+</head>
+<body>
+
+<div class="content-wrapper">
+  <header>
+    <div class="brand"><i class="fa-solid fa-store"></i> LKS Foods</div>
+    <div class="user-info" id="userInfo">
+      <button class="btn-auth" onclick="openModal('loginModal')">Sign In</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>Fresh & Quality Foods</h1>
+    <p>Order your favorite items directly via WhatsApp</p>
+    <div id="heroShopTiming" class="hero-timing-badge"></div>
+  </div>
+
+  <div class="container">
+    <div class="sticky-category-container">
+      <div class="section-title">
+        <span>Categories</span>
+        <span style="font-size: 12px; color: var(--muted); font-weight: normal;" id="itemCount">0 Items</span>
+      </div>
+      <div class="category-bar" id="categoryBar">
+        <button class="cat-btn active" onclick="filterCategory('All', this)">All</button>
+      </div>
+    </div>
+
+    <div id="menuContainer"></div>
+    <div id="paginationContainer" class="pagination-container" style="display: none;"></div>
+  </div>
+</div>
+
+<div id="cartBar" class="cart-bar" style="display: none;">
+  <div><span id="cartQty">0 items</span> | <b id="cartTotal" style="color: #ff9900;">₹0</b></div>
+  <button class="cart-btn" onclick="openCheckout()"><i class="fa-brands fa-whatsapp"></i> Checkout</button>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Sign In</h3>
+      <button class="close-btn" onclick="closeModal('loginModal')">&times;</button>
+    </div>
+    
+    <div id="signInStep1">
+      <div class="form-group">
+        <label>Your Name *</label>
+        <input id="loginName" required placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <label>Mobile Number *</label>
+        <input id="loginPhone" type="tel" maxlength="10" required placeholder="10-digit mobile number">
+      </div>
+      <button type="button" onclick="sendUserOtp()" class="btn-add" style="width: 100%; padding: 10px; margin-top: 5px; font-size: 14px;">Send OTP via WhatsApp</button>
+    </div>
+
+    <div id="signInStep2" style="display:none;">
+      <p id="otpInfoText" style="font-size: 13px; color: green; margin-bottom: 10px;"></p>
+      <div class="form-group">
+        <label>Enter 4-Digit OTP *</label>
+        <input id="loginOtp" type="tel" maxlength="4" placeholder="- - - -">
+      </div>
+      <button type="button" onclick="verifyUserOtp()" class="btn-add" style="width: 100%; padding: 10px; margin-top: 5px; font-size: 14px;">Verify & Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- History Modal -->
+<div id="historyModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Your Orders</h3>
+      <button class="close-btn" onclick="closeModal('historyModal')">&times;</button>
+    </div>
+    
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label><i class="fa-solid fa-calendar-days"></i> Select Date to View Orders:</label>
+      <input type="date" id="historyDateFilter" onchange="openHistory()" style="background: #fff; cursor: pointer;">
+    </div>
+
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- Checkout Modal with Live Location Feature -->
+<div id="checkoutModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Complete Order</h3>
+      <button class="close-btn" onclick="closeModal('checkoutModal')">&times;</button>
+    </div>
+
+    <div id="shopClosedNotice" class="notice-box"></div>
+
+    <div id="cartList" style="margin-bottom: 12px;"></div>
+    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-bottom: 14px; padding-top: 8px; border-top: 1px solid var(--border);">
+      <span>Total Amount:</span>
+      <span id="modalTotal" style="color: #B12704;">₹0</span>
+    </div>
+
+    <form onsubmit="placeOrderWhatsApp(event)">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input id="custName" readonly style="background-color: #e9ecef; cursor: not-allowed; font-weight: bold;" required>
+      </div>
+      <div class="form-group">
+        <label>Mobile Number *</label>
+        <input id="custPhone" readonly style="background-color: #e9ecef; cursor: not-allowed; font-weight: bold;" required>
+      </div>
+
+      <div class="form-group">
+        <label>Apartment Name *</label>
+        <input id="custApartment" value="Sadhbhavan Township" readonly style="background-color: #e9ecef; cursor: not-allowed; font-weight: bold;" required>
+      </div>
+      <div class="form-group">
+        <label>Block Number *</label>
+        <input id="custBlock" required placeholder="Enter block number (e.g. Block A)">
+      </div>
+      <div class="form-group">
+        <label>Door Number *</label>
+        <input id="custDoor" required placeholder="Enter door / flat number">
+      </div>
+
+      <!-- Live Location Capture Field -->
+      <div class="form-group">
+        <label>Delivery Location (GPS) *</label>
+        <button type="button" class="btn-location" onclick="captureLiveLocation()">
+          <i class="fa-solid fa-location-crosshairs"></i> Get Current Live Location
+        </button>
+        <input id="custLocation" required readonly placeholder="Location coordinates will appear here" style="margin-top: 6px; background-color: #e9ecef; font-size: 11px;">
+      </div>
+      
+      <button type="submit" id="whatsappSubmitBtn" class="cart-btn" style="width: 100%; justify-content: center; padding: 11px; font-size: 14px; border-radius: 6px; margin-top: 5px;">
+        <i class="fa-brands fa-whatsapp"></i> Send Order via WhatsApp
+      </button>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <p><b id="footerTitle">LKS Foods</b></p>
+  <p id="footerDesc">Fresh Quality Foods & Delicacies Delivery Service</p>
+  <p>Contact: <span id="footerPhone">+91 7095797501</span></p>
+  <p style="margin-top: 10px; font-size: 11px; color: #999;">&copy; <span id="footerYear">2026</span> <span id="footerCopyTitle">LKS Foods</span>. All rights reserved.</p>
+</footer>
+
+<script>
+const ADMIN_WHATSAPP_NUMBER = "917095797501"; 
+
+const DEFAULT_MENU = {
+  curry_500g: { id: 'curry_500g', name: 'Chicken Curry', category: 'Curry', portion: '500 grams', price: 140, image: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=500' },
+  curry_1kg: { id: 'curry_1kg', name: 'Chicken Curry', category: 'Curry', portion: '1 kg', price: 270, image: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=500' },
+  skinless_1kg: { id: 'skinless_1kg', name: 'Skinless Chicken', category: 'Chicken', portion: '1 kg', price: 270, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=500' }
+};
+
+let pendingUser = {}; 
+let cart = [];
+let currentCategory = 'All';
+let currentPage = 1;
+const itemsPerPage = 20; 
+
+let currentUser = JSON.parse(localStorage.getItem('lks_current_user') || localStorage.getItem('lks_logged_customer') || 'null');
+
+function loadFooterDetails() {
+  const savedFooter = JSON.parse(localStorage.getItem('lks_footer_details') || '{}');
+  const title = savedFooter.title || 'LKS Foods';
+  const desc = savedFooter.desc || 'Fresh Quality Foods & Delicacies Delivery Service';
+  const phone = savedFooter.phone || '+91 7095797501';
+
+  if(document.getElementById('footerTitle')) document.getElementById('footerTitle').textContent = title;
+  if(document.getElementById('footerDesc')) document.getElementById('footerDesc').textContent = desc;
+  if(document.getElementById('footerPhone')) document.getElementById('footerPhone').textContent = phone;
+  if(document.getElementById('footerCopyTitle')) document.getElementById('footerCopyTitle').textContent = title;
+}
+
+function formatTo12Hour(timeStr) {
+  if (!timeStr) return "";
+  let [hours, minutes] = timeStr.split(':').map(Number);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const formattedHours = hours < 10 ? '0' + hours : hours;
+  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+  return `${formattedHours}:${formattedMinutes} ${ampm}`;
+}
+
+function updateHeroTimings() {
+  const openTime = localStorage.getItem('lks_open_time') || "08:00";
+  const closeTime = localStorage.getItem('lks_close_time') || "19:00";
+  const open12 = formatTo12Hour(openTime);
+  const close12 = formatTo12Hour(closeTime);
+  const heroBox = document.getElementById('heroShopTiming');
+  if (heroBox) {
+    heroBox.innerHTML = `<i class="fa-solid fa-clock"></i> Timings: ${open12} to ${close12}`;
+  }
+}
+
+function checkAndDisplayShopStatus() {
+  const isManualClosed = JSON.parse(localStorage.getItem('lks_shop_closed') || 'false');
+  let startDateStr = localStorage.getItem('lks_close_start_date');
+  let endDateStr = localStorage.getItem('lks_close_end_date');
+  const noticeBox = document.getElementById('shopClosedNotice');
+  const submitBtn = document.getElementById('whatsappSubmitBtn');
+
+  if (isManualClosed) {
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (!startDateStr) startDateStr = todayStr;
+    if (!endDateStr) endDateStr = todayStr;
+    
+    const formattedStart = startDateStr.split('-').reverse().join('-');
+    const formattedEnd = endDateStr.split('-').reverse().join('-');
+
+    noticeBox.style.display = 'block';
+    noticeBox.innerHTML = `<marquee behavior="scroll" direction="left"><i class="fa-solid fa-triangle-exclamation"></i> LKS Foods is currently closed. Holiday notice from ${formattedStart} to ${formattedEnd}</marquee>`;
+    if (submitBtn) submitBtn.disabled = true;
+    return;
+  }
+
+  if (startDateStr && endDateStr) {
+    const formattedStart = startDateStr.split('-').reverse().join('-');
+    const formattedEnd = endDateStr.split('-').reverse().join('-');
+    noticeBox.style.display = 'block';
+    noticeBox.innerHTML = `<marquee behavior="scroll" direction="left">⚠️ Holiday notice from ${formattedStart} to ${formattedEnd}</marquee>`;
+    if (submitBtn) submitBtn.disabled = false;
+  } else {
+    noticeBox.style.display = 'none';
+    if (submitBtn) submitBtn.disabled = false;
+  }
+}
+
+// Function to get current live location coordinates
+function captureLiveLocation() {
+  if (!navigator.geolocation) {
+    alert('మీ బ్రౌజర్ లొకేషన్‌ను సపోర్ట్ చేయడం లేదు.');
+    return;
+  }
+  
+  const locationInput = document.getElementById('custLocation');
+  locationInput.value = "ਲొకేషన్ క్యాప్చర్ అవుతోంది... దయచేసి వేచి ఉండండి...";
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+      locationInput.value = mapsLink;
+      alert('లొకేషన్ విజయవంతంగా క్యాప్చర్ చేయబడింది!');
+    },
+    (error) => {
+      console.error(error);
+      alert('లొకేషన్ పొందడంలో విఫలమైంది. దయచేసి జీపీఎస్ (GPS) పర్మిషన్ ఇవ్వండి.');
+      locationInput.value = '';
+    },
+    { enableHighAccuracy: true }
+  );
+}
+
+function sendUserOtp() {
+  const nameInput = document.getElementById('loginName');
+  const phoneInput = document.getElementById('loginPhone');
+
+  if (!nameInput || !phoneInput) return alert('Input fields missing!');
+  
+  const name = nameInput.value.trim();
+  const phone = phoneInput.value.trim();
+
+  if (!name || phone.length !== 10) {
+    return alert('దయచేసి సరైన పేరు మరియు 10-అంకెల ఫోన్ నంబర్‌ను ఎంటర్ చేయండి.');
+  }
+  
+  pendingUser = { name, phone };
+
+  fetch('http://localhost:3000/api/user/send-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, phone })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success) {
+      document.getElementById('signInStep1').style.display = 'none';
+      document.getElementById('signInStep2').style.display = 'block';
+      document.getElementById('otpInfoText').innerHTML = `OTP sent to WhatsApp: <b>${phone}</b>`;
+    } else { 
+      alert(data.message || 'OTP పంపడంలో విఫలమైంది.'); 
+    }
+  })
+  .catch(err => {
+    console.error('Fetch error:', err);
+    alert('సర్వర్ కనెక్ట్ అవ్వట్లేదు. server.js రన్ అవుతుందో లేదో చెక్ చేయండి.');
+  });
+}
+
+function verifyUserOtp() {
+  const otpInput = document.getElementById('loginOtp');
+  if (!otpInput) return;
+  const otp = otpInput.value.trim();
+
+  if (otp.length !== 4) {
+    return alert('దయచేసి 4-అంకెల OTPని ఎంటర్ చేయండి.');
+  }
+
+  fetch('http://localhost:3000/api/user/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: pendingUser.name, phone: pendingUser.phone, otp: otp })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success) {
+      localStorage.setItem('lks_current_user', JSON.stringify(data.user));
+      localStorage.setItem('lks_logged_customer', JSON.stringify(data.user));
+      location.reload();
+    } else { 
+      alert(data.message || 'ఇచ్చిన OTP తప్పుగా ఉంది!'); 
+    }
+  })
+  .catch(err => {
+    console.error('Verification error:', err);
+    alert('సర్వర్ కనెక్షన్ ఎర్రర్ ఏర్పడింది.');
+  });
+}
+
+function handleLogout() {
+  localStorage.removeItem('lks_current_user');
+  localStorage.removeItem('lks_logged_customer');
+  currentUser = null;
+  checkUserSession();
+  location.reload();
+}
+
+function checkUserSession() {
+  currentUser = JSON.parse(localStorage.getItem('lks_current_user') || localStorage.getItem('lks_logged_customer') || 'null');
+  const container = document.getElementById('userInfo');
+  
+  if (currentUser && container) {
+    container.innerHTML = `
+      <span style="font-size: 12px; color: #ccc;">Hi, ${currentUser.name} (${currentUser.phone})</span>
+      <button class="btn-auth secondary" onclick="openHistory()">Orders</button>
+      <button class="btn-auth secondary" onclick="handleLogout()">Sign Out</button>
+    `;
+    if(document.getElementById('custName')) document.getElementById('custName').value = currentUser.name;
+    if(document.getElementById('custPhone')) document.getElementById('custPhone').value = currentUser.phone;
+  } else if (container) {
+    container.innerHTML = `<button class="btn-auth" onclick="openModal('loginModal')">Sign In</button>`;
+  }
+}
+
+function getMergedMenu() {
+  let deleted = JSON.parse(localStorage.getItem('lks_deleted_menu_items') || '[]');
+  let priceOverrides = JSON.parse(localStorage.getItem('lks_menu_prices') || '{}');
+  let dynamicProducts = JSON.parse(localStorage.getItem('lks_dynamic_products') || '[]');
+  let menuMap = new Map();
+
+  Object.keys(DEFAULT_MENU).forEach(id => {
+    if (!deleted.includes(id)) {
+      let item = { ...DEFAULT_MENU[id] };
+      if (priceOverrides[id]) {
+        let p = priceOverrides[id];
+        if (p.base !== undefined) item.price = Number(p.base || 0) + Number(p.cook || 0);
+      }
+      menuMap.set(id, item);
+    }
+  });
+
+  dynamicProducts.forEach(dp => {
+    if (dp.active !== false && !deleted.includes(dp.id)) {
+      let price = Number(dp.price || 0);
+      if (priceOverrides[dp.id]) {
+        let p = priceOverrides[dp.id];
+        price = Number(p.base || 0) + Number(p.cook || 0);
+      }
+      menuMap.set(dp.id, {
+        id: dp.id, name: dp.name, category: dp.category || 'Special',
+        portion: dp.portion, price: price,
+        image: dp.image || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500'
+      });
+    }
+  });
+  return Array.from(menuMap.values());
+}
+
+function renderMenu() {
+  const products = getMergedMenu();
+  const categoryBar = document.getElementById('categoryBar');
+  const menuContainer = document.getElementById('menuContainer');
+  const paginationContainer = document.getElementById('paginationContainer');
+  document.getElementById('itemCount').textContent = products.length + ' items';
+
+  const categories = ['All', ...new Set(products.map(p => p.category ? p.category.trim() : 'Main Menu'))];
+
+  categoryBar.innerHTML = categories.map(cat => `
+    <button class="cat-btn ${cat === currentCategory ? 'active' : ''}" onclick="filterCategory('${cat}', this)">
+      ${cat}
+    </button>
+  `).join('');
+
+  let filteredProducts = currentCategory === 'All' 
+    ? products 
+    : products.filter(p => (p.category ? p.category.trim() : 'Main Menu') === currentCategory);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+  let html = '';
+  if (paginatedProducts.length > 0) {
+    html += `
+      <div class="grid">
+        ${paginatedProducts.map(item => `
+          <div class="card">
+            <img src="${item.image}" class="card-img" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500'">
+            <div class="card-body">
+              <span class="card-tag">Best Seller</span>
+              <div class="card-title">${item.name}</div>
+              <div class="card-portion">${item.portion}</div>
+              <div class="card-footer">
+                <span class="card-price">₹${item.price}</span>
+                <button class="btn-add" onclick="addToCart('${item.id}')">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  menuContainer.innerHTML = html || '<p style="text-align:center; color:var(--muted); padding: 30px;">No products found.</p>';
+
+  if (filteredProducts.length > itemsPerPage) {
+    paginationContainer.style.display = 'flex';
+    let paginationHtml = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">Previous</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      paginationHtml += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+    }
+    paginationHtml += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next</button>`;
+    paginationContainer.innerHTML = paginationHtml;
+  } else {
+    paginationContainer.style.display = 'none';
+  }
+}
+
+function filterCategory(cat, btn) {
+  currentCategory = cat;
+  currentPage = 1;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderMenu();
+}
+
+function changePage(page) {
+  currentPage = page;
+  renderMenu();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function addToCart(id) {
+  const items = getMergedMenu();
+  const item = items.find(x => x.id === id);
+  if (!item) return;
+  const existing = cart.find(x => x.id === id);
+  if (existing) existing.qty++;
+  else cart.push({ ...item, qty: 1 });
+  updateCartUI();
+}
+
+function updateQty(id, delta) {
+  const idx = cart.findIndex(x => x.id === id);
+  if (idx !== -1) {
+    cart[idx].qty += delta;
+    if (cart[idx].qty <= 0) cart.splice(idx, 1);
+  }
+  updateCartUI();
+  renderCartModal();
+}
+
+function getCartTotal() { return cart.reduce((s, i) => s + (i.price * i.qty), 0); }
+
+function updateCartUI() {
+  const bar = document.getElementById('cartBar');
+  const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+  if (totalQty > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('cartQty').textContent = totalQty + ' items';
+    document.getElementById('cartTotal').textContent = '₹' + getCartTotal();
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function openHistory() {
+  if (!currentUser) return openModal('loginModal');
+  let allOrders = JSON.parse(localStorage.getItem('lks_all_orders') || '[]');
+  let userOrders = allOrders.filter(o => String(o.customerPhone || '').trim() === String(currentUser.phone).trim());
+  
+  const dateFilterInput = document.getElementById('historyDateFilter');
+  const selectedDate = dateFilterInput ? dateFilterInput.value : '';
+  
+  if (selectedDate) {
+    userOrders = userOrders.filter(o => {
+      if (!o.createdAt) return false;
+      let orderDate = o.createdAt.split('T')[0];
+      return orderDate === selectedDate;
+    });
+  }
+
+  const historyList = document.getElementById('historyList');
+  
+  if (!userOrders.length) {
+    historyList.innerHTML = '<p style="text-align:center; color:var(--muted); padding:20px;">No orders found for the selected date.</p>';
+  } else {
+    historyList.innerHTML = userOrders.map(o => {
+      let st = o.status || 'Pending';
+      let cancelBtnHtml = '';
+      if (st === 'Pending') {
+        cancelBtnHtml = `<div style="margin-top: 8px; text-align: right;"><button class="btn-cancel" onclick="cancelCustomerOrder('${o.id || o.orderId}')">Cancel Order</button></div>`;
+      }
+      let orderDateFormatted = o.createdAt ? new Date(o.createdAt).toLocaleString() : '';
+      let locationHtml = o.location ? `<div style="font-size: 12px; margin-top: 4px;"><a href="${o.location}" target="_blank" style="color: #007185; text-decoration: none;"><i class="fa-solid fa-map-location-dot"></i> View Location Map</a></div>` : '';
+      return `
+        <div class="history-card">
+          <div class="history-head">
+            <span><b>${o.id || o.orderId}</b></span>
+            <span class="history-status ${st}">${st}</span>
+          </div>
+          <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">${orderDateFormatted}</div>
+          <div style="font-size: 13px; margin-bottom: 4px; color: var(--text);">
+            ${(o.items || []).map(i => `${i.name} (${i.portion || ''}) × ${i.qty}`).join(', ')}
+          </div>
+          <div style="font-size: 13px; font-weight: bold; color: #B12704;">Total: ₹${o.total}</div>
+          ${locationHtml}
+          ${cancelBtnHtml}
+        </div>
+      `;
+    }).join('');
+  }
+  openModal('historyModal');
+}
+
+function cancelCustomerOrder(orderId) {
+  if (!confirm('మీరు ఈ ఆర్డర్‌ని రద్దు చేయాలనుకుంటున్నారా?')) return;
+  let allOrders = JSON.parse(localStorage.getItem('lks_all_orders') || '[]');
+  let idx = allOrders.findIndex(o => String(o.id || o.orderId) === String(orderId));
+  if (idx !== -1) {
+    allOrders[idx].status = 'Cancelled';
+    localStorage.setItem('lks_all_orders', JSON.stringify(allOrders));
+    openHistory(); 
+  }
+}
+
+function placeOrderWhatsApp(e) {
+  e.preventDefault();
+  const isManualClosed = JSON.parse(localStorage.getItem('lks_shop_closed') || 'false');
+  if (isManualClosed) {
+    alert("Store is currently closed.");
+    return;
+  }
+  if (!cart.length) return;
+
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const apartment = document.getElementById('custApartment').value.trim();
+  const block = document.getElementById('custBlock').value.trim();
+  const door = document.getElementById('custDoor').value.trim();
+  const location = document.getElementById('custLocation').value.trim();
+
+  if (!location) {
+    alert('దయచేసి "Get Current Live Location" బటన్‌ను క్లిక్ చేసి లొకేషన్‌ను ఎంటర్ చేయండి.');
+    return;
+  }
+
+  currentUser = { name, phone };
+  localStorage.setItem('lks_current_user', JSON.stringify(currentUser));
+  localStorage.setItem('lks_logged_customer', JSON.stringify(currentUser));
+  checkUserSession();
+
+  const orderId = 'ORD_' + Date.now().toString().slice(-6);
+  const newOrder = {
+    id: orderId,
+    orderId: orderId,
+    customerName: name,
+    customerPhone: phone,
+    apartment: apartment,
+    block: block,
+    door: door,
+    location: location,
+    items: cart.map(i => ({ name: i.name, portion: i.portion, qty: i.qty, price: i.price })),
+    total: getCartTotal(),
+    status: 'Pending',
+    createdAt: new Date().toISOString()
+  };
+
+  let allOrders = JSON.parse(localStorage.getItem('lks_all_orders') || '[]');
+  allOrders.unshift(newOrder);
+  localStorage.setItem('lks_all_orders', JSON.stringify(allOrders));
+
+  let msg = `*NEW ORDER - ${orderId}*\n\n`;
+  msg += `*Name:* ${name}\n`;
+  msg += `*Phone:* ${phone}\n`;
+  msg += `*Apartment:* ${apartment}\n`;
+  msg += `*Block:* ${block}\n`;
+  msg += `*Door No:* ${door}\n`;
+  msg += `*Location Map:* ${location}\n\n`;
+  msg += `*Items Ordered:*\n`;
+  cart.forEach((i, idx) => {
+    msg += `${idx + 1}. ${i.name} (${i.portion}) - Qty: ${i.qty} - ₹${i.price * i.qty}\n`;
+  });
+  msg += `\n*Total Amount: ₹${getCartTotal()}*`;
+
+  const waUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl, '_blank');
+
+  cart = [];
+  updateCartUI();
+  closeModal('checkoutModal');
+}
+
+function openModal(id) { document.getElementById(id).style.display = 'grid'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function openCheckout() {
+  if (!currentUser) {
+    openModal('loginModal');
+    return;
+  }
+  renderCartModal();
+  checkAndDisplayShopStatus();
+  openModal('checkoutModal');
+}
+
+function renderCartModal() {
+  const list = document.getElementById('cartList');
+  list.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div>
+        <b style="color: var(--text);">${item.name}</b> (${item.portion})<br>
+        <span style="color: var(--muted); font-size: 11px;">₹${item.price} × ${item.qty} = ₹${item.price * item.qty}</span>
+      </div>
+      <div class="qty-controls">
+        <button class="qty-btn" onclick="updateQty('${item.id}', -1)">-</button>
+        <b style="color: var(--text);">${item.qty}</b>
+        <button class="qty-btn" onclick="updateQty('${item.id}', 1)">+</button>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('modalTotal').textContent = '₹' + getCartTotal();
+}
+
+window.addEventListener('storage', (e) => {
+  renderMenu();
+  updateHeroTimings();
+  loadFooterDetails();
+  
+  let historyModal = document.getElementById('historyModal');
+  if(historyModal && historyModal.style.display === 'grid') {
+    openHistory();
+  }
+
+  if (['lks_close_start_date', 'lks_close_end_date', 'lks_shop_closed', 'lks_open_time', 'lks_close_time'].includes(e.key)) {
+    checkAndDisplayShopStatus();
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkUserSession();
+  renderMenu();
+  updateHeroTimings();
+  loadFooterDetails();
+});
+</script>
+</body>
+</html>
